@@ -1,33 +1,39 @@
 package day1
 
 object Pedestrian {
-  def walk(directions: Seq[(Turn.Value, Int)]): Int = {
-    var north, east = 0
-
-    var facing: Facing.Value = Facing.N
-    directions.foreach { (direction: (Turn.Value, Int)) =>
-      facing = (facing, direction._1) match {
-        case (Facing.N, Turn.L) => Facing.W
-        case (Facing.N, Turn.R) => Facing.E
-        case (Facing.S, Turn.L) => Facing.E
-        case (Facing.S, Turn.R) => Facing.W
-        case (Facing.E, Turn.L) => Facing.N
-        case (Facing.E, Turn.R) => Facing.S
-        case (Facing.W, Turn.L) => Facing.S
-        case (Facing.W, Turn.R) => Facing.N
-      }
-      north = facing match {
-        case Facing.N => north + direction._2
-        case Facing.S => north - direction._2
-        case _        => north
-      }
-      east = facing match {
-        case Facing.E => east + direction._2
-        case Facing.W => east - direction._2
-        case _        => east
-      }
+  def distanceToEnd(directions: Seq[(Turn.Value, Int)]): Int = {
+    directions.foldLeft(Facing.N, (0, 0)) {
+      case ((facing, position), direction) =>
+        turnAndStep(facing, position, direction)
+    } match {
+      case (_, (north, east)) => Math.abs(north) + Math.abs(east)
     }
-    Math.abs(north) + Math.abs(east)
+  }
+
+  def turnAndStep(curFacing: Facing.Value,
+                  curPos: (Int, Int),
+                  direction: (Turn.Value, Int)): (Facing.Value, (Int, Int)) = {
+    val newFacing: Facing.Value = (curFacing, direction._1) match {
+      case (Facing.N, Turn.L) => Facing.W
+      case (Facing.N, Turn.R) => Facing.E
+      case (Facing.S, Turn.L) => Facing.E
+      case (Facing.S, Turn.R) => Facing.W
+      case (Facing.E, Turn.L) => Facing.N
+      case (Facing.E, Turn.R) => Facing.S
+      case (Facing.W, Turn.L) => Facing.S
+      case (Facing.W, Turn.R) => Facing.N
+    }
+    val newNorth: Int = newFacing match {
+      case Facing.N => curPos._1 + direction._2
+      case Facing.S => curPos._1 - direction._2
+      case _ => curPos._1
+    }
+    val newEast: Int = newFacing match {
+      case Facing.E => curPos._2 + direction._2
+      case Facing.W => curPos._2 - direction._2
+      case _ => curPos._2
+    }
+    (newFacing, (newNorth, newEast))
   }
 
   def parseDirections(directions: String): Seq[(Turn.Value, Int)] = {
@@ -35,7 +41,6 @@ object Pedestrian {
       (Turn.withName(s.head.toString), s.tail.toInt)
     }
   }
-
 }
 
 object Facing extends Enumeration {
