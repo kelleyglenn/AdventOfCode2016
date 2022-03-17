@@ -1,8 +1,15 @@
 package day1
 
 object Pedestrian {
+  {
+    N.right = E
+    N.left = W
+    S.right = W
+    S.left = E
+  }
+
   def distanceToEnd(directions: Seq[(Turn.Value, Int)]): Int = {
-    directions.foldLeft(Facing.N, (0, 0)) {
+    directions.foldLeft(N.asInstanceOf[Facing], (0, 0)) {
       case ((facing, position), direction) =>
         turnAndStep(facing, position, direction)
     } match {
@@ -10,27 +17,22 @@ object Pedestrian {
     }
   }
 
-  def turnAndStep(curFacing: Facing.Value,
+  def turnAndStep(curFacing: Facing,
                   curPos: (Int, Int),
-                  direction: (Turn.Value, Int)): (Facing.Value, (Int, Int)) = {
-    val newFacing: Facing.Value = (curFacing, direction._1) match {
-      case (Facing.N, Turn.L) => Facing.W
-      case (Facing.N, Turn.R) => Facing.E
-      case (Facing.S, Turn.L) => Facing.E
-      case (Facing.S, Turn.R) => Facing.W
-      case (Facing.E, Turn.L) => Facing.N
-      case (Facing.E, Turn.R) => Facing.S
-      case (Facing.W, Turn.L) => Facing.S
-      case (Facing.W, Turn.R) => Facing.N
+                  direction: (Turn.Value, Int)): (Facing, (Int, Int)) = {
+    val newFacing: Facing = direction._1 match {
+      case Turn.L => curFacing.left
+      case Turn.R => curFacing.right
+
     }
     val newNorth: Int = newFacing match {
-      case Facing.N => curPos._1 + direction._2
-      case Facing.S => curPos._1 - direction._2
+      case N => curPos._1 + direction._2
+      case S => curPos._1 - direction._2
       case _ => curPos._1
     }
     val newEast: Int = newFacing match {
-      case Facing.E => curPos._2 + direction._2
-      case Facing.W => curPos._2 - direction._2
+      case E => curPos._2 + direction._2
+      case W => curPos._2 - direction._2
       case _ => curPos._2
     }
     (newFacing, (newNorth, newEast))
@@ -43,9 +45,16 @@ object Pedestrian {
   }
 }
 
-object Facing extends Enumeration {
-  val N, S, E, W = Value
-}
+class Facing(var left: Facing = null, var right: Facing = null)
+
+object N extends Facing
+
+object S extends Facing
+
+object E extends Facing(N, S)
+
+object W extends Facing(S, N)
+
 object Turn extends Enumeration {
   val L, R = Value
 }
